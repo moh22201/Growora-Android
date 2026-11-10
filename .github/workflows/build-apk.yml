@@ -38,6 +38,7 @@ jobs:
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Build signed release APK
+        id: signed_release
         if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' && env.ANDROID_KEYSTORE_PASSWORD != '' && env.ANDROID_KEY_ALIAS != '' && env.ANDROID_KEY_PASSWORD != '' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -47,7 +48,7 @@ jobs:
         run: gradle --no-daemon :app:assembleRelease
 
       - name: Verify signed release APK
-        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' && env.ANDROID_KEYSTORE_PASSWORD != '' && env.ANDROID_KEY_ALIAS != '' && env.ANDROID_KEY_PASSWORD != '' }}
+        if: ${{ steps.signed_release.outcome == 'success' }}
         run: |
           APK="app/build/outputs/apk/release/app-release.apk"
           test -f "$APK"
